@@ -187,8 +187,8 @@ Each milestone has a concrete "done when." Don't start the next until it's met.
 
 ### M0 — Scaffolding
 - [x] Solution, four projects, references, packages.
-- [ ] Git repo (Git Bash), `.gitignore` incl. ROM/ISO extensions and `sessions/`.
-- [ ] Remove template placeholders (`Class1.cs`, `UnitTest1.cs`); DI wiring in App and Cli.
+- [x] Git repo (Git Bash), `.gitignore` incl. ROM/ISO extensions and `sessions/`.
+- [x] Remove template placeholders (`Class1.cs`, `UnitTest1.cs`); DI wiring in App and Cli.
 - **Done when:** `dotnet build` and `dotnet test` pass and the scaffold is committed.
 
 ### M1 — YAML builder (the core of the whole app)
