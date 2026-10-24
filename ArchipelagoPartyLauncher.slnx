@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="ApParty.App/ApParty.App.csproj" />
+    <Project Path="ApParty.Cli/ApParty.Cli.csproj" />
+    <Project Path="ApParty.Core/ApParty.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="ApParty.Core.Tests/ApParty.Core.Tests.csproj" />
+  </Folder>
+</Solution>
