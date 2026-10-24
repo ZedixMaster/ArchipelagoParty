@@ -1,0 +1,8 @@
+{
+  "id": "dk64",
+  "displayName": "Donkey Kong 64",
+  "archipelagoGameName": "Donkey Kong 64",
+  "apWorldFile": "dk64.apworld",
+  "minArchipelagoVersion": "0.6.5",
+  "patchExtension": ".chunky"
+}

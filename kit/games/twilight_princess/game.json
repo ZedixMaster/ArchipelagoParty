@@ -1,0 +1,8 @@
+{
+  "id": "twilight_princess",
+  "displayName": "The Legend of Zelda: Twilight Princess",
+  "archipelagoGameName": "Twilight Princess",
+  "apWorldFile": "Twilight Princess.apworld",
+  "minArchipelagoVersion": "0.6.1",
+  "patchExtension": ".aptp"
+}

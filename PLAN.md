@@ -68,7 +68,7 @@ ArchipelagoPartyLauncher/
 ├── kit/                    shipped data (copied next to the .exe)
 │   ├── kit.json            pinned versions + hashes
 │   └── games/
-│       ├── twilight-princess/
+│       ├── twilight_princess/
 │       │   ├── game.json
 │       │   ├── Twilight Princess.apworld
 │       │   └── presets/  streamlined.yaml, standard.yaml, …
@@ -95,23 +95,19 @@ Machine-specific settings (Archipelago path, server port, last session) live in
 ## 4. Core domain model (`ApParty.Core/Models`)
 
 ```csharp
-record GameDefinition(
-    string Id,                    // "twilight_princess"
-    string DisplayName,           // "The Legend of Zelda: Twilight Princess"
-    string ArchipelagoGameName,   // "Twilight Princess" — must match the YAML `game:` key exactly
-    string? ApWorldFile,          // null for core games bundled with Archipelago
-    string? ApWorldSha256,
-    string MinArchipelagoVersion,
-    string? PatchExtension,       // ".aptp", ".chunky", null
-    string PlayerInstructions);   // text shown after generation + put in README
+record GameDefinition {           // deserialized from kit/games/<id>/game.json
+    required string Id;           // "twilight_princess" — also the folder name
+    required string DisplayName;
+    required string ArchipelagoGameName;   // must match the YAML `game:` key exactly
+    string? ApWorldFile;          // null for core games bundled with Archipelago
+    required string MinArchipelagoVersion;
+    string? PatchExtension;       // ".aptp", ".chunky", null
+}
 
 record Preset(string Id, string DisplayName, string GameId, string FilePath);
 
-class PlayerSlot {                // mutable — edited in the UI
-    string Name;                  // ≤16 chars, unique in session
-    string GameId;
-    string PresetId;
-    Dictionary<string, object> Overrides;   // option path → value, e.g. "early_shadow_crystal" → true
+record PlayerSlot(string Name, string GameId, string PresetId) {
+    IReadOnlyDictionary<string, object> Overrides;   // option → value, e.g. "early_shadow_crystal" → true
 }
 
 record Session(string Id, string Name, DateTime Created, string ArchipelagoVersion,
@@ -120,6 +116,11 @@ record Session(string Id, string Name, DateTime Created, string ArchipelagoVersi
 record KitManifest(string KitVersion, string ArchipelagoVersion,
                    IReadOnlyDictionary<string, string> ApWorldHashes);
 ```
+
+Models are immutable; the WPF layer gets its own view models (M4). APWorld hashes live only in
+`kit.json` (M2). Per-game player instructions arrive with handoff packages (v0.2).
+
+Generator output naming (verified): `AP_<seed>_P<slot>_<Name><patchExtension>` inside `AP_<seed>.zip`.
 
 ---
 
