@@ -7,6 +7,6 @@ public sealed record GameDefinition
     public required string ArchipelagoGameName { get; init; }
     public string? ApWorldFile { get; init; }
     public string? ApWorldSha256 { get; init; }
-    public required string MinArchipelagoVersion { get; init; }
+    public required Version MinArchipelagoVersion { get; init; }
     public string? PatchExtension { get; init; }
 }

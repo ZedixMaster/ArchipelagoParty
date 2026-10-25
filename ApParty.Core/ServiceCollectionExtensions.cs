@@ -1,4 +1,7 @@
+using ApParty.Core.ApWorlds;
+using ApParty.Core.Archipelago;
 using ApParty.Core.Catalog;
+using ApParty.Core.Health;
 using ApParty.Core.Validation;
 using ApParty.Core.Yaml;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +15,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IGameCatalog>(_ => GameCatalog.Load(Path.Combine(kitDirectory, "games")));
         services.AddSingleton<IYamlBuilder, YamlBuilder>();
         services.AddSingleton<IPlayerValidator, PlayerValidator>();
+        services.AddSingleton<IArchipelagoLocator, ArchipelagoLocator>();
+        services.AddSingleton<IApWorldManager, ApWorldManager>();
+        services.AddSingleton<IEnvironmentChecker, EnvironmentChecker>();
         return services;
     }
 }

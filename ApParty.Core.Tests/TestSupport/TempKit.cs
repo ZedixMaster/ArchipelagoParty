@@ -8,7 +8,9 @@ internal sealed record ApWorldSpec(string FileName, string PinnedSha256, string?
 
 internal sealed class TempKit : IDisposable
 {
-    public string GamesDirectory { get; } = Directory.CreateTempSubdirectory("apparty-kit-").FullName;
+    public string KitDirectory { get; } = Directory.CreateTempSubdirectory("apparty-kit-").FullName;
+
+    public string GamesDirectory => Path.Combine(KitDirectory, "games");
 
     public static string Sha256(string content) =>
         Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
@@ -47,10 +49,18 @@ internal sealed class TempKit : IDisposable
         return this;
     }
 
+    public TempKit WithMinArchipelagoVersion(string gameId, string version)
+    {
+        var gameJsonPath = Path.Combine(GamesDirectory, gameId, "game.json");
+        File.WriteAllText(gameJsonPath, File.ReadAllText(gameJsonPath)
+            .Replace("\"minArchipelagoVersion\": \"0.6.0\"", $"\"minArchipelagoVersion\": \"{version}\""));
+        return this;
+    }
+
     public string PresetPath(string gameId, string presetId) =>
         Path.Combine(GamesDirectory, gameId, "presets", presetId + ".yaml");
 
     public GameCatalog LoadCatalog() => GameCatalog.Load(GamesDirectory);
 
-    public void Dispose() => Directory.Delete(GamesDirectory, recursive: true);
+    public void Dispose() => Directory.Delete(KitDirectory, recursive: true);
 }

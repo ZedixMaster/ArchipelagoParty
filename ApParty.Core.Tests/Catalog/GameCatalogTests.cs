@@ -26,7 +26,7 @@ public sealed class GameCatalogTests : IDisposable
         Assert.Equal("The Legend of Zelda: Twilight Princess", tp.DisplayName);
         Assert.Equal("Twilight Princess", tp.ArchipelagoGameName);
         Assert.Equal("Twilight Princess.apworld", tp.ApWorldFile);
-        Assert.Equal("0.6.1", tp.MinArchipelagoVersion);
+        Assert.Equal(new Version(0, 6, 1), tp.MinArchipelagoVersion);
         Assert.Equal(".aptp", tp.PatchExtension);
     }
 
@@ -123,6 +123,18 @@ public sealed class GameCatalogTests : IDisposable
     public void Malformed_json_fails_and_names_the_file()
     {
         WriteGame("test", "{ not json", "standard");
+
+        var ex = Assert.Throws<GameCatalogException>(() => GameCatalog.Load(_tempDir));
+
+        Assert.Contains(Path.Combine(_tempDir, "test", "game.json"), ex.Message);
+    }
+
+    [Fact]
+    public void Malformed_min_archipelago_version_fails_and_names_the_file()
+    {
+        WriteGame("test", """
+            { "id": "test", "displayName": "Test", "archipelagoGameName": "Test", "minArchipelagoVersion": "soon" }
+            """, "standard");
 
         var ex = Assert.Throws<GameCatalogException>(() => GameCatalog.Load(_tempDir));
 

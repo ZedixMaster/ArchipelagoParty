@@ -139,5 +139,5 @@ public sealed class ArchipelagoLocatorTests : IDisposable
     }
 
     private static ArchipelagoSearchResult Locate(params string[] searchPaths) =>
-        new ArchipelagoLocator(searchPaths).Locate();
+        new ArchipelagoLocator().Locate(searchPaths);
 }

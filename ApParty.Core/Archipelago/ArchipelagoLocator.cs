@@ -2,13 +2,15 @@ using System.Text.Json;
 
 namespace ApParty.Core.Archipelago;
 
-public sealed class ArchipelagoLocator(IReadOnlyList<string> searchPaths) : IArchipelagoLocator
+public sealed class ArchipelagoLocator : IArchipelagoLocator
 {
     public static readonly string DefaultInstallDirectory = @"C:\ProgramData\Archipelago";
 
+    public static readonly IReadOnlyList<string> DefaultSearchPaths = [DefaultInstallDirectory];
+
     private static readonly string[] RequiredExecutables = ["ArchipelagoGenerate.exe", "ArchipelagoServer.exe"];
 
-    public ArchipelagoSearchResult Locate()
+    public ArchipelagoSearchResult Locate(IReadOnlyList<string> searchPaths)
     {
         var problems = new List<string>();
 
