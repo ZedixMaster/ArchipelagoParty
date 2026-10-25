@@ -186,13 +186,13 @@ sessions/2026-10-24_001_saturday-night/
 
 Each milestone has a concrete "done when." Don't start the next until it's met.
 
-### M0 — Scaffolding
+### M0 — Scaffolding — ✅ done 2026-10-24
 - [x] Solution, four projects, references, packages.
 - [x] Git repo (Git Bash), `.gitignore` incl. ROM/ISO extensions and `sessions/`.
 - [x] Remove template placeholders (`Class1.cs`, `UnitTest1.cs`); DI wiring in App and Cli.
 - **Done when:** `dotnet build` and `dotnet test` pass and the scaffold is committed.
 
-### M1 — YAML builder (the core of the whole app)
+### M1 — YAML builder (the core of the whole app) — ✅ done 2026-10-24
 - `GameDefinition`, `Preset`, `PlayerSlot`; `IGameCatalog`; `IYamlBuilder`; `IPlayerValidator`.
 - Create TP and DK64 game folders; derive the first preset of each from the real YAMLs used in the
   last seed (`Players\Josh.yaml`, `Players\Tamas_DK64.yaml`), with `name: TEMPLATE`.

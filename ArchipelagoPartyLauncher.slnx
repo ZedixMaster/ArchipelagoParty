@@ -5,6 +5,7 @@
     <Project Path="ApParty.Core/ApParty.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="ApParty.Cli.Tests/ApParty.Cli.Tests.csproj" Id="295cd57e-78d0-4c5e-a079-a163c8a40e64" />
     <Project Path="ApParty.Core.Tests/ApParty.Core.Tests.csproj" />
   </Folder>
 </Solution>

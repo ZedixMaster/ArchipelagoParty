@@ -1,25 +1,13 @@
-﻿using ApParty.Core;
-using ApParty.Core.Catalog;
+﻿using ApParty.Cli;
+using ApParty.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-var services = new ServiceCollection();
-services.AddApPartyCore(Path.Combine(AppContext.BaseDirectory, "kit"));
+using var services = new ServiceCollection()
+    .AddApPartyCore(Path.Combine(AppContext.BaseDirectory, "kit"))
+    .BuildServiceProvider(new ServiceProviderOptions
+    {
+        ValidateOnBuild = true,
+        ValidateScopes = true,
+    });
 
-using var provider = services.BuildServiceProvider(new ServiceProviderOptions
-{
-    ValidateOnBuild = true,
-    ValidateScopes = true,
-});
-
-var catalog = provider.GetRequiredService<IGameCatalog>();
-
-Console.WriteLine("apparty — Archipelago Party Launcher CLI");
-Console.WriteLine();
-Console.WriteLine("Games:");
-foreach (var game in catalog.Games)
-{
-    var presets = string.Join(", ", catalog.GetPresets(game.Id).Select(p => p.Id));
-    Console.WriteLine($"  {game.Id,-20} {game.DisplayName}  [presets: {presets}]");
-}
-
-return 0;
+return CliApp.Run(args, services, Console.Out, Console.Error);
