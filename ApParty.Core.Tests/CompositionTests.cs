@@ -33,10 +33,10 @@ public class CompositionTests
     public void Yaml_builder_and_validator_resolve_and_work_against_the_shipped_kit()
     {
         using var provider = BuildProvider();
-        var player = new PlayerSlot("Josh", "twilight_princess", "streamlined");
+        var player = new PlayerSlot("Alice", "twilight_princess", "streamlined");
 
         Assert.Empty(provider.GetRequiredService<IPlayerValidator>().Validate([player]));
-        Assert.Contains("name: Josh", provider.GetRequiredService<IYamlBuilder>().Build(player));
+        Assert.Contains("name: Alice", provider.GetRequiredService<IYamlBuilder>().Build(player));
     }
 
     private static ServiceProvider BuildProvider() =>

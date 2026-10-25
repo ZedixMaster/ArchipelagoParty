@@ -13,7 +13,7 @@ public sealed class PlayerValidatorTests : IDisposable
     [Fact]
     public void Valid_players_produce_no_errors()
     {
-        var errors = Validate(Player("Josh"), Player("Tamas"));
+        var errors = Validate(Player("Alice"), Player("Bob"));
 
         Assert.Empty(errors);
     }
@@ -60,8 +60,8 @@ public sealed class PlayerValidatorTests : IDisposable
     }
 
     [Theory]
-    [InlineData(" Josh")]
-    [InlineData("Josh ")]
+    [InlineData(" Alice")]
+    [InlineData("Alice ")]
     public void Name_with_leading_or_trailing_whitespace_is_an_error(string name)
     {
         var error = Assert.Single(Validate(Player(name)));
@@ -72,7 +72,7 @@ public sealed class PlayerValidatorTests : IDisposable
     [Fact]
     public void Duplicate_names_are_reported_for_every_player_sharing_the_name_ignoring_case()
     {
-        var errors = Validate(Player("Josh"), Player("Tamas"), Player("josh"));
+        var errors = Validate(Player("Alice"), Player("Bob"), Player("alice"));
 
         Assert.Equal(new int?[] { 0, 2 }, errors.Select(e => e.PlayerIndex));
     }
@@ -80,7 +80,7 @@ public sealed class PlayerValidatorTests : IDisposable
     [Fact]
     public void Unknown_game_is_an_error()
     {
-        var error = Assert.Single(Validate(new PlayerSlot("Josh", "missing_game", "basic")));
+        var error = Assert.Single(Validate(new PlayerSlot("Alice", "missing_game", "basic")));
 
         Assert.Equal(0, error.PlayerIndex);
         Assert.Contains("missing_game", error.Message);
@@ -89,7 +89,7 @@ public sealed class PlayerValidatorTests : IDisposable
     [Fact]
     public void Unknown_preset_is_an_error()
     {
-        var error = Assert.Single(Validate(new PlayerSlot("Josh", "test", "missing_preset")));
+        var error = Assert.Single(Validate(new PlayerSlot("Alice", "test", "missing_preset")));
 
         Assert.Equal(0, error.PlayerIndex);
         Assert.Contains("missing_preset", error.Message);
@@ -100,7 +100,7 @@ public sealed class PlayerValidatorTests : IDisposable
     {
         var errors = Validate(
             Player("ABCDEFGHIJKLMNOPQ"),
-            new PlayerSlot("Tamas", "missing_game", "basic"),
+            new PlayerSlot("Bob", "missing_game", "basic"),
             Player(""));
 
         Assert.Equal(new int?[] { 0, 1, 2 }, errors.Select(e => e.PlayerIndex));

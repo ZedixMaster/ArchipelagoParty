@@ -480,7 +480,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-[200~# Never commit game images or local state
+# Never commit game images or local state
 *.z64
 *.n64
 *.iso
@@ -489,3 +489,7 @@ $RECYCLE.BIN/
 *.sfc
 *.smc
 sessions/
+*.apworld
+
+# Personal planning export
+Plan.pdf

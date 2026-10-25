@@ -37,9 +37,9 @@ public sealed class CliAppTests : IDisposable
     [Fact]
     public void Yaml_writes_a_file_named_after_the_player_and_game_and_reports_its_path()
     {
-        var exitCode = RunYaml("Josh", "twilight_princess", "streamlined");
+        var exitCode = RunYaml("Alice", "twilight_princess", "streamlined");
 
-        var expectedPath = Path.Combine(OutDir, "Josh_twilight_princess.yaml");
+        var expectedPath = Path.Combine(OutDir, "Alice_twilight_princess.yaml");
         Assert.Equal(ExitCodes.Success, exitCode);
         Assert.True(File.Exists(expectedPath));
         Assert.Contains(expectedPath, _stdout.ToString());
@@ -48,11 +48,11 @@ public sealed class CliAppTests : IDisposable
     [Fact]
     public void Yaml_file_contents_are_exactly_the_yaml_builder_output()
     {
-        RunYaml("Josh", "twilight_princess", "streamlined");
+        RunYaml("Alice", "twilight_princess", "streamlined");
 
         var expected = _services.GetRequiredService<IYamlBuilder>()
-            .Build(new PlayerSlot("Josh", "twilight_princess", "streamlined"));
-        Assert.Equal(expected, File.ReadAllText(Path.Combine(OutDir, "Josh_twilight_princess.yaml")));
+            .Build(new PlayerSlot("Alice", "twilight_princess", "streamlined"));
+        Assert.Equal(expected, File.ReadAllText(Path.Combine(OutDir, "Alice_twilight_princess.yaml")));
     }
 
     [Fact]
@@ -60,33 +60,33 @@ public sealed class CliAppTests : IDisposable
     {
         var nested = Path.Combine(OutDir, "a", "b");
 
-        var exitCode = Run("yaml", "--name", "Josh", "--game", "twilight_princess", "--preset", "streamlined", "--out", nested);
+        var exitCode = Run("yaml", "--name", "Alice", "--game", "twilight_princess", "--preset", "streamlined", "--out", nested);
 
         Assert.Equal(ExitCodes.Success, exitCode);
-        Assert.True(File.Exists(Path.Combine(nested, "Josh_twilight_princess.yaml")));
+        Assert.True(File.Exists(Path.Combine(nested, "Alice_twilight_princess.yaml")));
     }
 
     [Fact]
     public void Yaml_overwrites_an_existing_file()
     {
         Directory.CreateDirectory(OutDir);
-        var path = Path.Combine(OutDir, "Josh_twilight_princess.yaml");
+        var path = Path.Combine(OutDir, "Alice_twilight_princess.yaml");
         File.WriteAllText(path, "stale");
 
-        RunYaml("Josh", "twilight_princess", "streamlined");
+        RunYaml("Alice", "twilight_princess", "streamlined");
 
-        Assert.Contains("name: Josh", File.ReadAllText(path));
+        Assert.Contains("name: Alice", File.ReadAllText(path));
     }
 
     [Fact]
     public void Characters_invalid_in_file_names_are_replaced_in_the_file_name_only()
     {
-        var exitCode = RunYaml("Sam: #1", "twilight_princess", "streamlined");
+        var exitCode = RunYaml("Carol: #1", "twilight_princess", "streamlined");
 
-        var path = Path.Combine(OutDir, "Sam_ #1_twilight_princess.yaml");
+        var path = Path.Combine(OutDir, "Carol_ #1_twilight_princess.yaml");
         Assert.Equal(ExitCodes.Success, exitCode);
         Assert.True(File.Exists(path));
-        Assert.Contains("Sam: #1", File.ReadAllText(path));
+        Assert.Contains("Carol: #1", File.ReadAllText(path));
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public sealed class CliAppTests : IDisposable
     [Fact]
     public void Unknown_game_is_a_validation_error_not_a_crash()
     {
-        var exitCode = RunYaml("Josh", "nope", "streamlined");
+        var exitCode = RunYaml("Alice", "nope", "streamlined");
 
         Assert.Equal(ExitCodes.ValidationFailed, exitCode);
         Assert.Contains("Unknown game 'nope'", _stderr.ToString());

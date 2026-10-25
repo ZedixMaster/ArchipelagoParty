@@ -175,7 +175,7 @@ Show human-readable versions in the UI if the `.apworld` contains an `archipelag
 ```
 sessions/2026-10-24_001_saturday-night/
 ├── session.json
-├── players/      Josh_twilight_princess.yaml, Tamas_dk64.yaml
+├── players/      Alice_twilight_princess.yaml, Bob_dk64.yaml
 ├── output/       AP_<seed>.zip, extracted patch files
 └── logs/         generate.log, server.log
 ```
@@ -195,10 +195,10 @@ Each milestone has a concrete "done when." Don't start the next until it's met.
 ### M1 — YAML builder (the core of the whole app) — ✅ done 2026-10-24
 - `GameDefinition`, `Preset`, `PlayerSlot`; `IGameCatalog`; `IYamlBuilder`; `IPlayerValidator`.
 - Create TP and DK64 game folders; derive the first preset of each from the real YAMLs used in the
-  last seed (`Players\Josh.yaml`, `Players\Tamas_DK64.yaml`), with `name: TEMPLATE`.
-- **Golden test:** building `Josh` + TP + that preset produces a document semantically equal to the
-  original `Josh.yaml` (compare parsed trees, not text). Same for DK64.
-- CLI: `apparty yaml --name Josh --game twilight_princess --preset streamlined --out .`
+  last seed (`Players\Alice.yaml`, `Players\Bob_DK64.yaml`), with `name: TEMPLATE`.
+- **Golden test:** building `Alice` + TP + that preset produces a document semantically equal to the
+  original seed YAML (compare parsed trees, not text). Same for DK64.
+- CLI: `apparty yaml --name Alice --game twilight_princess --preset streamlined --out .`
 - **Done when:** golden tests pass and the CLI writes a YAML that `ArchipelagoGenerate --skip_output`
   accepts.
 

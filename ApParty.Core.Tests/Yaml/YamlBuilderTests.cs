@@ -37,18 +37,18 @@ public sealed class YamlBuilderTests : IDisposable
     public void Golden_twilight_princess_matches_the_yaml_played_in_the_2026_10_21_seed()
     {
         var yaml = new YamlBuilder(GameCatalog.Load(ShippedGamesDir))
-            .Build(new PlayerSlot("Josh", "twilight_princess", "streamlined"));
+            .Build(new PlayerSlot("Alice", "twilight_princess", "streamlined"));
 
-        YamlAssert.Equivalent(ReadGolden("Josh.yaml"), yaml, ignoredTopLevelKeys: "description");
+        YamlAssert.Equivalent(ReadGolden("twilight_princess_streamlined.yaml"), yaml, ignoredTopLevelKeys: "description");
     }
 
     [Fact]
     public void Golden_dk64_matches_the_yaml_played_in_the_2026_10_21_seed()
     {
         var yaml = new YamlBuilder(GameCatalog.Load(ShippedGamesDir))
-            .Build(new PlayerSlot("Tamas", "dk64", "standard"));
+            .Build(new PlayerSlot("Bob", "dk64", "standard"));
 
-        YamlAssert.Equivalent(ReadGolden("Tamas_DK64.yaml"), yaml, ignoredTopLevelKeys: "description");
+        YamlAssert.Equivalent(ReadGolden("dk64_standard.yaml"), yaml, ignoredTopLevelKeys: "description");
     }
 
     [Fact]
@@ -56,15 +56,15 @@ public sealed class YamlBuilderTests : IDisposable
     {
         var yaml = BuildTestPlayer();
 
-        YamlAssert.Equivalent(TestPreset.Replace("name: TEMPLATE", "name: Josh"), yaml);
+        YamlAssert.Equivalent(TestPreset.Replace("name: TEMPLATE", "name: Alice"), yaml);
     }
 
     [Fact]
     public void Name_with_yaml_special_characters_round_trips()
     {
-        var yaml = new YamlBuilder(_kit.LoadCatalog()).Build(new PlayerSlot("Sam: #1 'Ace'", "test", "basic"));
+        var yaml = new YamlBuilder(_kit.LoadCatalog()).Build(new PlayerSlot("Carol: #1 'Ace'", "test", "basic"));
 
-        YamlAssert.Equivalent(TestPreset.Replace("name: TEMPLATE", """name: "Sam: #1 'Ace'" """), yaml);
+        YamlAssert.Equivalent(TestPreset.Replace("name: TEMPLATE", """name: "Carol: #1 'Ace'" """), yaml);
     }
 
     [Theory]
@@ -171,7 +171,7 @@ public sealed class YamlBuilderTests : IDisposable
         using var kit = new TempKit().WithGame("test", "Test Game", ("wrong", TestPreset.Replace("game: Test Game", "game: Other Game")));
 
         var ex = Assert.Throws<YamlBuildException>(() =>
-            new YamlBuilder(kit.LoadCatalog()).Build(new PlayerSlot("Josh", "test", "wrong")));
+            new YamlBuilder(kit.LoadCatalog()).Build(new PlayerSlot("Alice", "test", "wrong")));
 
         Assert.Contains("Test Game", ex.Message);
         Assert.Contains("Other Game", ex.Message);
@@ -183,7 +183,7 @@ public sealed class YamlBuilderTests : IDisposable
         using var kit = new TempKit().WithGame("test", "Test Game", ("bare", "name: TEMPLATE\ngame: Test Game\n"));
 
         var ex = Assert.Throws<YamlBuildException>(() =>
-            new YamlBuilder(kit.LoadCatalog()).Build(new PlayerSlot("Josh", "test", "bare")));
+            new YamlBuilder(kit.LoadCatalog()).Build(new PlayerSlot("Alice", "test", "bare")));
 
         Assert.Contains("Test Game", ex.Message);
     }
@@ -192,11 +192,11 @@ public sealed class YamlBuilderTests : IDisposable
     public void Unknown_preset_throws_key_not_found()
     {
         Assert.Throws<KeyNotFoundException>(() =>
-            new YamlBuilder(_kit.LoadCatalog()).Build(new PlayerSlot("Josh", "test", "nope")));
+            new YamlBuilder(_kit.LoadCatalog()).Build(new PlayerSlot("Alice", "test", "nope")));
     }
 
     private string BuildTestPlayer(params (string Option, object Value)[] overrides) =>
-        new YamlBuilder(_kit.LoadCatalog()).Build(new PlayerSlot("Josh", "test", "basic")
+        new YamlBuilder(_kit.LoadCatalog()).Build(new PlayerSlot("Alice", "test", "basic")
         {
             Overrides = overrides.ToDictionary(o => o.Option, o => o.Value),
         });
