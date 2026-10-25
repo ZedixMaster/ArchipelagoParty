@@ -10,6 +10,11 @@ public sealed class YamlBuilder(IGameCatalog catalog) : IYamlBuilder
 {
     private const string SelectedWeight = "50";
 
+    private static readonly HashSet<string> Yaml11BoolAndNullWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "true", "false", "yes", "no", "on", "off", "y", "n", "null",
+    };
+
     public string Build(PlayerSlot player)
     {
         var game = catalog.GetGame(player.GameId);
@@ -25,13 +30,18 @@ public sealed class YamlBuilder(IGameCatalog catalog) : IYamlBuilder
             throw new YamlBuildException(
                 $"Preset '{preset.Id}' has no '{game.ArchipelagoGameName}' options section: {preset.FilePath}");
 
-        document.Children["name"] = new YamlScalarNode(player.Name);
+        document.Children["name"] = NameNode(player.Name);
 
         foreach (var (option, value) in player.Overrides)
             options.Children[option] = ToOptionNode(option, value);
 
         return Serialize(document);
     }
+
+    private static YamlScalarNode NameNode(string name) =>
+        name.Length > 0 && char.IsLetter(name[0]) && !Yaml11BoolAndNullWords.Contains(name)
+            ? new YamlScalarNode(name)
+            : new YamlScalarNode(name) { Style = ScalarStyle.SingleQuoted };
 
     private static YamlNode ToOptionNode(string option, object value) => value switch
     {

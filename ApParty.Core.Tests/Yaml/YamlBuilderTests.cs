@@ -67,6 +67,23 @@ public sealed class YamlBuilderTests : IDisposable
         YamlAssert.Equivalent(TestPreset.Replace("name: TEMPLATE", """name: "Sam: #1 'Ace'" """), yaml);
     }
 
+    [Theory]
+    [InlineData("1337")]
+    [InlineData("-5")]
+    [InlineData("1:20")]
+    [InlineData(".inf")]
+    [InlineData("true")]
+    [InlineData("Yes")]
+    [InlineData("OFF")]
+    [InlineData("null")]
+    [InlineData("~")]
+    public void Name_that_yaml_would_read_as_a_number_bool_or_null_is_quoted(string name)
+    {
+        var yaml = new YamlBuilder(_kit.LoadCatalog()).Build(new PlayerSlot(name, "test", "basic"));
+
+        YamlAssert.Equivalent(TestPreset.Replace("name: TEMPLATE", $"name: '{name}'"), yaml);
+    }
+
     [Fact]
     public void String_override_replaces_the_whole_weight_mapping()
     {

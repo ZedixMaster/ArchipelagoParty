@@ -1,4 +1,7 @@
 using ApParty.Core.Catalog;
+using ApParty.Core.Models;
+using ApParty.Core.Validation;
+using ApParty.Core.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ApParty.Core.Tests;
@@ -24,6 +27,16 @@ public class CompositionTests
 
         Assert.Same(catalog, provider.GetRequiredService<IGameCatalog>());
         Assert.Contains(catalog.Games, g => g.Id == "twilight_princess");
+    }
+
+    [Fact]
+    public void Yaml_builder_and_validator_resolve_and_work_against_the_shipped_kit()
+    {
+        using var provider = BuildProvider();
+        var player = new PlayerSlot("Josh", "twilight_princess", "streamlined");
+
+        Assert.Empty(provider.GetRequiredService<IPlayerValidator>().Validate([player]));
+        Assert.Contains("name: Josh", provider.GetRequiredService<IYamlBuilder>().Build(player));
     }
 
     private static ServiceProvider BuildProvider() =>
