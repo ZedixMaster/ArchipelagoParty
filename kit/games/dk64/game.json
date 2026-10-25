@@ -3,6 +3,7 @@
   "displayName": "Donkey Kong 64",
   "archipelagoGameName": "Donkey Kong 64",
   "apWorldFile": "dk64.apworld",
+  "apWorldSha256": "814f8f1b1508f0941a8ae4ffa50dc886040b38b408d644bdd27ff16d58b66170",
   "minArchipelagoVersion": "0.6.5",
   "patchExtension": ".chunky"
 }

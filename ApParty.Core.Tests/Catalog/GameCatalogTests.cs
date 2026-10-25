@@ -31,6 +31,52 @@ public sealed class GameCatalogTests : IDisposable
     }
 
     [Fact]
+    public void Reads_the_pinned_apworld_hash_from_game_json()
+    {
+        var tp = GameCatalog.Load(ShippedGamesDir).GetGame("twilight_princess");
+
+        Assert.Equal("4490b9101ecdaee5a9aab88aaf88b2e71305028aa3bed35a2f1d4ab69295a8e7", tp.ApWorldSha256);
+    }
+
+    [Fact]
+    public void Game_directory_is_the_folder_the_game_was_loaded_from()
+    {
+        var catalog = GameCatalog.Load(ShippedGamesDir);
+
+        Assert.Equal(Path.Combine(ShippedGamesDir, "dk64"), catalog.GetGameDirectory("dk64"));
+        Assert.Throws<KeyNotFoundException>(() => catalog.GetGameDirectory("nope"));
+    }
+
+    [Fact]
+    public void Apworld_file_without_a_pinned_hash_fails_and_names_the_file()
+    {
+        WriteGame("test", """
+            { "id": "test", "displayName": "Test", "archipelagoGameName": "Test",
+              "apWorldFile": "test.apworld", "minArchipelagoVersion": "0.6.0" }
+            """, "standard");
+
+        var ex = Assert.Throws<GameCatalogException>(() => GameCatalog.Load(_tempDir));
+
+        Assert.Contains(Path.Combine(_tempDir, "test", "game.json"), ex.Message);
+        Assert.Contains("apWorldSha256", ex.Message);
+    }
+
+    [Theory]
+    [InlineData("abc123")]
+    [InlineData("zz90b9101ecdaee5a9aab88aaf88b2e71305028aa3bed35a2f1d4ab69295a8e7")]
+    public void Pinned_hash_that_is_not_64_hex_characters_fails(string badHash)
+    {
+        WriteGame("test", $$"""
+            { "id": "test", "displayName": "Test", "archipelagoGameName": "Test",
+              "apWorldFile": "test.apworld", "apWorldSha256": "{{badHash}}", "minArchipelagoVersion": "0.6.0" }
+            """, "standard");
+
+        var ex = Assert.Throws<GameCatalogException>(() => GameCatalog.Load(_tempDir));
+
+        Assert.Contains("apWorldSha256", ex.Message);
+    }
+
+    [Fact]
     public void Finds_presets_in_the_game_presets_folder()
     {
         var preset = GameCatalog.Load(ShippedGamesDir).GetPreset("twilight_princess", "streamlined");

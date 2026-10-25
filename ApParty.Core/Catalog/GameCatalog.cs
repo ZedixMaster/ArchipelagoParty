@@ -34,6 +34,8 @@ public sealed class GameCatalog : IGameCatalog
 
     public GameDefinition GetGame(string gameId) => GetEntry(gameId).Game;
 
+    public string GetGameDirectory(string gameId) => GetEntry(gameId).Directory;
+
     public IReadOnlyList<Preset> GetPresets(string gameId) => GetEntry(gameId).Presets;
 
     public Preset GetPreset(string gameId, string presetId) =>
@@ -48,11 +50,16 @@ public sealed class GameCatalog : IGameCatalog
     private static GameEntry LoadGameFolder(string gameDir)
     {
         var folderName = Path.GetFileName(gameDir);
-        var game = ReadGameJson(Path.Combine(gameDir, "game.json"));
+        var gameJsonPath = Path.Combine(gameDir, "game.json");
+        var game = ReadGameJson(gameJsonPath);
 
         if (game.Id != folderName)
             throw new GameCatalogException(
                 $"Game folder '{folderName}' contains a game.json with id '{game.Id}'. They must match.");
+
+        if (game.ApWorldFile is not null && !IsSha256Hex(game.ApWorldSha256))
+            throw new GameCatalogException(
+                $"{gameJsonPath} sets apWorldFile, so apWorldSha256 must be the file's 64-character SHA-256 hash.");
 
         var presetsDir = Path.Combine(gameDir, "presets");
         var presets = LoadPresets(presetsDir, game.Id);
@@ -60,8 +67,11 @@ public sealed class GameCatalog : IGameCatalog
         if (presets.Count == 0)
             throw new GameCatalogException($"Game '{game.Id}' has no presets in {presetsDir}");
 
-        return new GameEntry(game, presets);
+        return new GameEntry(game, gameDir, presets);
     }
+
+    private static bool IsSha256Hex(string? value) =>
+        value is { Length: 64 } && value.All(char.IsAsciiHexDigit);
 
     private static GameDefinition ReadGameJson(string path)
     {
@@ -95,5 +105,5 @@ public sealed class GameCatalog : IGameCatalog
     private static string ToDisplayName(string presetId) =>
         CultureInfo.InvariantCulture.TextInfo.ToTitleCase(presetId.Replace('_', ' '));
 
-    private sealed record GameEntry(GameDefinition Game, IReadOnlyList<Preset> Presets);
+    private sealed record GameEntry(GameDefinition Game, string Directory, IReadOnlyList<Preset> Presets);
 }

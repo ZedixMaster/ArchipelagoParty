@@ -8,6 +8,8 @@ public interface IGameCatalog
 
     GameDefinition GetGame(string gameId);
 
+    string GetGameDirectory(string gameId);
+
     IReadOnlyList<Preset> GetPresets(string gameId);
 
     Preset GetPreset(string gameId, string presetId);

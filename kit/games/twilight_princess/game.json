@@ -3,6 +3,7 @@
   "displayName": "The Legend of Zelda: Twilight Princess",
   "archipelagoGameName": "Twilight Princess",
   "apWorldFile": "Twilight Princess.apworld",
+  "apWorldSha256": "4490b9101ecdaee5a9aab88aaf88b2e71305028aa3bed35a2f1d4ab69295a8e7",
   "minArchipelagoVersion": "0.6.1",
   "patchExtension": ".aptp"
 }

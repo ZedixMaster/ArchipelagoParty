@@ -1,26 +1,47 @@
+using System.Security.Cryptography;
+using System.Text;
 using ApParty.Core.Catalog;
 
 namespace ApParty.Core.Tests.TestSupport;
+
+internal sealed record ApWorldSpec(string FileName, string PinnedSha256, string? KitContent);
 
 internal sealed class TempKit : IDisposable
 {
     public string GamesDirectory { get; } = Directory.CreateTempSubdirectory("apparty-kit-").FullName;
 
-    public TempKit WithGame(string id, string archipelagoGameName, params (string Id, string Yaml)[] presets)
+    public static string Sha256(string content) =>
+        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
+
+    public TempKit WithGame(string id, string archipelagoGameName, params (string Id, string Yaml)[] presets) =>
+        WithGame(id, archipelagoGameName, apWorld: null, presets);
+
+    public TempKit WithGame(string id, string archipelagoGameName, ApWorldSpec? apWorld, params (string Id, string Yaml)[] presets)
     {
         var gameDir = Path.Combine(GamesDirectory, id);
         Directory.CreateDirectory(Path.Combine(gameDir, "presets"));
+
+        var apWorldJson = apWorld is null
+            ? ""
+            : $$"""
+                "apWorldFile": "{{apWorld.FileName}}",
+                "apWorldSha256": "{{apWorld.PinnedSha256}}",
+              """;
 
         File.WriteAllText(Path.Combine(gameDir, "game.json"), $$"""
             {
               "id": "{{id}}",
               "displayName": "{{archipelagoGameName}}",
               "archipelagoGameName": "{{archipelagoGameName}}",
+              {{apWorldJson}}
               "minArchipelagoVersion": "0.6.0"
             }
             """);
 
-        foreach (var preset in presets)
+        if (apWorld?.KitContent is not null)
+            File.WriteAllText(Path.Combine(gameDir, apWorld.FileName), apWorld.KitContent);
+
+        foreach (var preset in presets.DefaultIfEmpty((Id: "standard", Yaml: $"name: TEMPLATE\ngame: {archipelagoGameName}\n{archipelagoGameName}: {{}}\n")))
             File.WriteAllText(Path.Combine(gameDir, "presets", preset.Id + ".yaml"), preset.Yaml);
 
         return this;
