@@ -17,4 +17,8 @@
     <ProjectReference Include="..\ApParty.Core\ApParty.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\kit\**\*" LinkBase="kit" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

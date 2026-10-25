@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using ApParty.Core;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +14,7 @@ public partial class App : Application
         base.OnStartup(e);
 
         var services = new ServiceCollection();
-        services.AddApPartyCore();
+        services.AddApPartyCore(Path.Combine(AppContext.BaseDirectory, "kit"));
         services.AddSingleton<MainWindow>();
 
         _services = services.BuildServiceProvider(new ServiceProviderOptions
