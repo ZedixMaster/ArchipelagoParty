@@ -142,6 +142,6 @@ public sealed class EnvironmentCheckerTests : IDisposable
     private EnvironmentReport Check(params string[] searchPaths)
     {
         var catalog = _kit.LoadCatalog();
-        return new EnvironmentChecker(new ArchipelagoLocator(), new ApWorldManager(catalog), catalog).Check(searchPaths);
+        return new EnvironmentChecker(new ArchipelagoLocator(), new ApWorldManager(catalog, TimeProvider.System), catalog).Check(searchPaths);
     }
 }

@@ -20,6 +20,7 @@ public static class CliApp
             GamesCommand(services, output),
             YamlCommand(services, output, error),
             DoctorCommand(services, output),
+            RepairCommand(services, output),
         };
 
         var parseResult = root.Parse(args);
@@ -91,19 +92,22 @@ public static class CliApp
         return command;
     }
 
+    private static Option<string> ArchipelagoOption() => new("--archipelago")
+    {
+        Description = $"Archipelago install folder (default: {ArchipelagoLocator.DefaultInstallDirectory}).",
+    };
+
+    private static IReadOnlyList<string> SearchPaths(string? archipelagoPath) =>
+        archipelagoPath is null ? ArchipelagoLocator.DefaultSearchPaths : [archipelagoPath];
+
     private static Command DoctorCommand(IServiceProvider services, TextWriter output)
     {
-        var archipelago = new Option<string>("--archipelago")
-        {
-            Description = $"Archipelago install folder (default: {ArchipelagoLocator.DefaultInstallDirectory}).",
-        };
-
+        var archipelago = ArchipelagoOption();
         var command = new Command("doctor", "Check that Archipelago and the kit's APWorlds are ready to generate.") { archipelago };
 
         command.SetAction(parseResult =>
         {
-            var path = parseResult.GetValue(archipelago);
-            var searchPaths = path is null ? ArchipelagoLocator.DefaultSearchPaths : [path];
+            var searchPaths = SearchPaths(parseResult.GetValue(archipelago));
             var report = services.GetRequiredService<IEnvironmentChecker>().Check(searchPaths);
 
             var problems = WriteReport(report, output);
@@ -121,29 +125,91 @@ public static class CliApp
         return command;
     }
 
+    private static Command RepairCommand(IServiceProvider services, TextWriter output)
+    {
+        var archipelago = ArchipelagoOption();
+        var command = new Command("repair", "Install or replace APWorlds in custom_worlds to match the kit's pinned versions.") { archipelago };
+
+        command.SetAction(parseResult =>
+        {
+            var search = services.GetRequiredService<IArchipelagoLocator>().Locate(SearchPaths(parseResult.GetValue(archipelago)));
+            if (WriteArchipelagoSection(search, output) is not { } install)
+                return ExitCodes.ProblemsFound;
+
+            var repairs = services.GetRequiredService<IApWorldManager>().Repair(install);
+            if (repairs.Count > 0)
+                output.WriteLine("APWorlds");
+
+            foreach (var repair in repairs)
+            {
+                var file = repair.Game.ApWorldFile;
+                var id = repair.Game.Id;
+                switch (repair.Outcome)
+                {
+                    case ApWorldRepairOutcome.AlreadyOk:
+                        Status(output, "[OK]", $"{id}: {file} already matches the pinned version");
+                        break;
+                    case ApWorldRepairOutcome.Installed:
+                        Status(output, "[FIXED]", $"{id}: installed {file}");
+                        break;
+                    case ApWorldRepairOutcome.Replaced:
+                        Status(output, "[FIXED]", $"{id}: replaced {file} (old version moved to {repair.BackupPath})");
+                        break;
+                    case ApWorldRepairOutcome.CannotRepair:
+                        Status(output, "[FAIL]", $"{id}: {repair.Problem}");
+                        break;
+                }
+            }
+
+            var fixedCount = repairs.Count(r => r.Outcome is ApWorldRepairOutcome.Installed or ApWorldRepairOutcome.Replaced);
+            var failedCount = repairs.Count(r => r.Outcome == ApWorldRepairOutcome.CannotRepair);
+
+            output.WriteLine();
+            output.WriteLine((fixedCount, failedCount) switch
+            {
+                (0, 0) => "Nothing to repair.",
+                (_, 0) => $"Repaired {fixedCount} of {repairs.Count} APWorlds.",
+                _ => $"{failedCount} of {repairs.Count} APWorlds could not be repaired.",
+            });
+            return failedCount == 0 ? ExitCodes.Success : ExitCodes.ProblemsFound;
+        });
+
+        return command;
+    }
+
+    private static void Status(TextWriter output, string marker, string message) =>
+        output.WriteLine($"  {marker,-7} {message}");
+
+    private static ArchipelagoInstall? WriteArchipelagoSection(ArchipelagoSearchResult search, TextWriter output)
+    {
+        output.WriteLine("Archipelago");
+        if (search.Install is not { } install)
+        {
+            Status(output, "[FAIL]", "Archipelago not found.");
+            foreach (var problem in search.Problems)
+                output.WriteLine($"{"",10}{problem}");
+            return null;
+        }
+
+        Status(output, "[OK]", $"Archipelago {install.Version} at {install.Directory}");
+        foreach (var problem in search.Problems)
+            Status(output, "[WARN]", problem);
+        return install;
+    }
+
     private static int WriteReport(EnvironmentReport report, TextWriter output)
     {
         var problems = 0;
-        void Ok(string message) => output.WriteLine($"  [OK]   {message}");
-        void Warn(string message) => output.WriteLine($"  [WARN] {message}");
+        void Ok(string message) => Status(output, "[OK]", message);
+        void Warn(string message) => Status(output, "[WARN]", message);
         void Fail(string message)
         {
-            output.WriteLine($"  [FAIL] {message}");
+            Status(output, "[FAIL]", message);
             problems++;
         }
 
-        output.WriteLine("Archipelago");
-        if (report.Archipelago.Install is not { } install)
-        {
-            Fail("Archipelago not found.");
-            foreach (var problem in report.Archipelago.Problems)
-                output.WriteLine($"         {problem}");
-            return problems;
-        }
-
-        Ok($"Archipelago {install.Version} at {install.Directory}");
-        foreach (var problem in report.Archipelago.Problems)
-            Warn(problem);
+        if (WriteArchipelagoSection(report.Archipelago, output) is not { } install)
+            return 1;
 
         if (report.ApWorlds.Count > 0)
         {

@@ -157,5 +157,5 @@ public sealed class ApWorldManagerTests : IDisposable
         File.WriteAllText(Path.Combine(_install.CustomWorldsDirectory, "test.apworld"), content);
     }
 
-    private IReadOnlyList<ApWorldCheck> Verify() => new ApWorldManager(_kit.LoadCatalog()).Verify(_install);
+    private IReadOnlyList<ApWorldCheck> Verify() => new ApWorldManager(_kit.LoadCatalog(), TimeProvider.System).Verify(_install);
 }
