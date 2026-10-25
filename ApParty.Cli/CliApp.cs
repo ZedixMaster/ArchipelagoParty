@@ -211,6 +211,9 @@ public static class CliApp
         if (WriteArchipelagoSection(report.Archipelago, output) is not { } install)
             return 1;
 
+        if (!report.ArchipelagoVersionMatchesKit)
+            Warn($"This kit was tested with Archipelago {report.KitArchipelagoVersion}, but {install.Version} is installed.");
+
         if (report.ApWorlds.Count > 0)
         {
             output.WriteLine("APWorlds");

@@ -125,6 +125,39 @@ public sealed class EnvironmentCheckerTests : IDisposable
         Assert.Equal("core_game", Assert.Single(report.GamesNeedingNewerArchipelago).Id);
     }
 
+    [Fact]
+    public void Installed_version_matching_the_kit_is_reported_as_matching()
+    {
+        WithWorldGame();
+        var apDir = InstallArchipelago(withWorld: WorldContent);
+
+        var report = Check(apDir);
+
+        Assert.True(report.ArchipelagoVersionMatchesKit);
+        Assert.Equal(new Version(0, 6, 8), report.KitArchipelagoVersion);
+    }
+
+    [Fact]
+    public void Installed_version_differing_from_the_kit_is_reported_but_stays_healthy()
+    {
+        WithWorldGame();
+        _kit.WithKitArchipelagoVersion("0.6.7");
+        var apDir = InstallArchipelago(withWorld: WorldContent);
+
+        var report = Check(apDir);
+
+        Assert.False(report.ArchipelagoVersionMatchesKit);
+        Assert.True(report.IsHealthy);
+    }
+
+    [Fact]
+    public void Version_match_is_false_when_archipelago_is_not_found()
+    {
+        WithWorldGame();
+
+        Assert.False(Check(_fake.Path("missing")).ArchipelagoVersionMatchesKit);
+    }
+
     private void WithWorldGame(string? kitContent = WorldContent) =>
         _kit.WithGame("test", "Test Game", new ApWorldSpec("test.apworld", TempKit.Sha256(WorldContent), kitContent));
 
@@ -142,6 +175,7 @@ public sealed class EnvironmentCheckerTests : IDisposable
     private EnvironmentReport Check(params string[] searchPaths)
     {
         var catalog = _kit.LoadCatalog();
-        return new EnvironmentChecker(new ArchipelagoLocator(), new ApWorldManager(catalog, TimeProvider.System), catalog).Check(searchPaths);
+        return new EnvironmentChecker(new ArchipelagoLocator(), new ApWorldManager(catalog, TimeProvider.System), catalog, _kit.LoadManifest())
+            .Check(searchPaths);
     }
 }

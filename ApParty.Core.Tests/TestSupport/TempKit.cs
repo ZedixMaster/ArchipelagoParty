@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using ApParty.Core.Catalog;
+using ApParty.Core.Kit;
 
 namespace ApParty.Core.Tests.TestSupport;
 
@@ -11,6 +12,19 @@ internal sealed class TempKit : IDisposable
     public string KitDirectory { get; } = Directory.CreateTempSubdirectory("apparty-kit-").FullName;
 
     public string GamesDirectory => Path.Combine(KitDirectory, "games");
+
+    public string ManifestPath => Path.Combine(KitDirectory, KitManifest.FileName);
+
+    public TempKit() => WithManifest("""{ "kitVersion": "0.1.0", "archipelagoVersion": "0.6.8" }""");
+
+    public TempKit WithManifest(string json)
+    {
+        File.WriteAllText(ManifestPath, json);
+        return this;
+    }
+
+    public TempKit WithKitArchipelagoVersion(string version) =>
+        WithManifest($$"""{ "kitVersion": "0.1.0", "archipelagoVersion": "{{version}}" }""");
 
     public static string Sha256(string content) =>
         Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
@@ -61,6 +75,8 @@ internal sealed class TempKit : IDisposable
         Path.Combine(GamesDirectory, gameId, "presets", presetId + ".yaml");
 
     public GameCatalog LoadCatalog() => GameCatalog.Load(GamesDirectory);
+
+    public KitManifest LoadManifest() => KitManifest.Load(KitDirectory);
 
     public void Dispose() => Directory.Delete(KitDirectory, recursive: true);
 }

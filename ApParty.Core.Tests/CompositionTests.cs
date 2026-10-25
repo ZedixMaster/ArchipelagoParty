@@ -1,4 +1,5 @@
 using ApParty.Core.Catalog;
+using ApParty.Core.Kit;
 using ApParty.Core.Models;
 using ApParty.Core.Validation;
 using ApParty.Core.Yaml;
@@ -27,6 +28,16 @@ public class CompositionTests
 
         Assert.Same(catalog, provider.GetRequiredService<IGameCatalog>());
         Assert.Contains(catalog.Games, g => g.Id == "twilight_princess");
+    }
+
+    [Fact]
+    public void Kit_manifest_resolves_from_the_shipped_kit()
+    {
+        using var provider = BuildProvider();
+
+        var manifest = provider.GetRequiredService<KitManifest>();
+
+        Assert.Equal(new Version(0, 6, 8), manifest.ArchipelagoVersion);
     }
 
     [Fact]

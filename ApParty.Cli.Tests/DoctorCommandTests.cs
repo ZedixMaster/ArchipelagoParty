@@ -34,7 +34,24 @@ public sealed class DoctorCommandTests : IDisposable
         Assert.Contains(apDir, Output);
         Assert.Contains("test.apworld", Output);
         Assert.DoesNotContain("[FAIL]", Output);
+        Assert.DoesNotContain("[WARN]", Output);
         Assert.Contains("All checks passed", Output);
+    }
+
+    [Fact]
+    public void Archipelago_version_differing_from_the_kit_is_a_warning_naming_both_versions()
+    {
+        WithWorldGame();
+        _kit.WithKitArchipelagoVersion("0.6.7");
+        var apDir = InstallArchipelago(withWorld: WorldContent);
+
+        var exitCode = Doctor("--archipelago", apDir);
+
+        Assert.Equal(ExitCodes.Success, exitCode);
+        Assert.Contains("[WARN]", Output);
+        Assert.Contains("0.6.7", Output);
+        Assert.Contains("0.6.8", Output);
+        Assert.DoesNotContain("[FAIL]", Output);
     }
 
     [Fact]
